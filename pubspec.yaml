@@ -1,0 +1,39 @@
+name: time_tracker_flutter_course
+description: A new Flutter application.
+
+publish_to: 'none'
+
+version: 1.0.0+8
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^0.5.2
+  audioplayers: ^0.10.0
+  path:
+  provider: ^3.0.0+1
+
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_launcher_icons: "^0.8.0"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/Icon.png"
+
+flutter:
+  assets:
+    - Ping.mp3
+  fonts:
+    - family: 'GoogleSans'
+      fonts:
+        - asset: Fonts\GoogleSans-Regular.ttf
+        - asset: Fonts\GoogleSans-Bold.ttf
+
+  uses-material-design: true
+
