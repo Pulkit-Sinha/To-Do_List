@@ -29,6 +29,8 @@ flutter_icons:
 flutter:
   assets:
     - Ping.mp3
+    - reaverace.mp3
+    - reaverkill.mp3
   fonts:
     - family: 'GoogleSans'
       fonts:

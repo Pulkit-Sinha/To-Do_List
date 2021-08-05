@@ -12,12 +12,21 @@ class TodoList extends StatefulWidget {
 
 class _TodoListState extends State<TodoList> {
   List<String> _todoList = <String>[];
+  List<String> _todoSpecialList = <String>[];
   final TextEditingController _textFieldController = TextEditingController();
   TextEditingController _textEdit = TextEditingController();
   AudioPlayer advancedPlayer;
   String listKey = "listKey";
 
   Future loadMusic() async {
+    advancedPlayer = await AudioCache().play("reaverkill.mp3");
+  }
+
+  Future specialloadMusic() async {
+    advancedPlayer = await AudioCache().play("reaverace.mp3");
+  }
+
+  Future pingloadMusic() async {
     advancedPlayer = await AudioCache().play("Ping.mp3");
   }
 
@@ -51,7 +60,7 @@ class _TodoListState extends State<TodoList> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(context),
         backgroundColor: Color(0xff141111),
-        splashColor: Colors.orange,
+        splashColor: Colors.pink,
         tooltip: 'Add Task',
         child: Icon(
           Icons.add,
@@ -63,22 +72,32 @@ class _TodoListState extends State<TodoList> {
   }
 
   void _addTodoItem(String title) {
-    // Wrapping it inside a set state will notify
-    // the app that the state has changed
     setState(() => _todoList.insert(0,title));
+    _textFieldController.clear();
+  }
+
+  void _addSpecialTodoItem(String title) {
+    setState(() => _todoSpecialList.insert(0,title));
     _textFieldController.clear();
   }
 
   void taskDone(String title) {
     setState(
       () {
-        loadMusic();
         _todoList.remove(title);
       },
     );
   }
 
-  // Generate list of item widgets
+  void specialtaskDone(String title) {
+    setState(
+          () {
+        _todoSpecialList.remove(title);
+      },
+    );
+  }
+
+  // Generate list of regular item widgets
   Widget _buildTodoItem(String title) {
     return Card(
       color: Color(0xff141111),
@@ -88,18 +107,26 @@ class _TodoListState extends State<TodoList> {
           Container(
             child: Align(
               alignment: Alignment.bottomLeft,
-              child: RaisedButton(
-                onPressed: () {
-                  taskDone(title);
-                },
-                color: Color(0xff141111),
-                shape: CircleBorder(
-                  side: BorderSide(color: Colors.yellow, width: 4),
+              child: SizedBox(
+                width: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    taskDone(title);
+                    loadMusic();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Color(0xff141111)),
+                    shape: MaterialStateProperty.all<OutlinedBorder>(CircleBorder(
+                      side: BorderSide(color: Colors.yellow, width: 4),
+                    ),
+                  ),
+                    overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  ),
                 ),
-                splashColor: Colors.orange,
               ),
             ),
           ),
+          SizedBox(width: 10),
           Container(
             child: Expanded(
               child: Align(
@@ -111,10 +138,141 @@ class _TodoListState extends State<TodoList> {
               ),
             ),
           ),
+          SizedBox(
+            width: 50,
+            child: Container(
+                child: ElevatedButton(
+                  onPressed: () {
+                    return showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Color(0xff141111),
+                          title: const Text(
+                            'Edit task:',
+                            style: TextStyle(color: Colors.yellow),
+                          ),
+                          content: TextField(
+                            maxLines: 3,
+                            showCursor: true,
+                            style: TextStyle(color: Colors.white),
+                            controller: _textEdit =
+                                TextEditingController(text: title),
+                            decoration: const InputDecoration(
+                                hintText: 'Enter task here.',
+                                hintStyle: TextStyle(color: Color(0xff696969))),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('SAVE',
+                              style: TextStyle(color: Colors.yellow),),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                setState(
+                                      () {
+                                    _todoList.remove(title);
+                                  },
+                                );
+                                _addTodoItem(_textEdit.text);
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('CANCEL',
+                              style: TextStyle(color: Colors.yellow),),
+                              onPressed: () {
+                                _textFieldController.text = '';
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      }, //builder
+                    ); //showDialog
+                  }, //onPressed
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Color(0xff141111)),
+                    overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  ),
+                  child: Icon(
+                    Icons.edit,
+                    size: 35,
+                    color: Colors.yellow,
+                  ),
+                ),
+              ),
+            ),
+          SizedBox(
+            width: 50,
+            child: Container(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _addSpecialTodoItem(title);
+                    taskDone(title);
+                    pingloadMusic();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Color(0xff141111)),
+                    overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  ),
+                  child: Icon(
+                    Icons.star_border,
+                    size: 35,
+                    color: Colors.yellow,
+                  ),
+                ),
+            ),
+          ),
+          SizedBox(width: 10)
+        ],
+      ),
+    );
+  }
+
+  // Generate list of special item widgets
+  Widget _buildSpecialTodoItem(String title) {
+    return Card(
+      color: Colors.yellow,
+      elevation: 5,
+      child: Row(
+        children: <Widget>[
           Container(
             child: Align(
-              alignment: Alignment.bottomRight,
-              child: RaisedButton(
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                width: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    specialtaskDone(title);
+                    specialloadMusic();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.yellow),
+                    shape: MaterialStateProperty.all<OutlinedBorder>(CircleBorder(
+                      side: BorderSide(color: Colors.black, width: 4),
+                    ),
+                    ),
+                    overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
+          Container(
+            child: Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  title,
+                  style: TextStyle(color: Colors.black, fontSize: 18),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 50,
+            child: Container(
+              child: ElevatedButton(
                 onPressed: () {
                   return showDialog(
                     context: context,
@@ -136,22 +294,22 @@ class _TodoListState extends State<TodoList> {
                               hintStyle: TextStyle(color: Color(0xff696969))),
                         ),
                         actions: <Widget>[
-                          FlatButton(
+                          TextButton(
                             child: const Text('SAVE',
-                            style: TextStyle(color: Colors.yellow),),
+                              style: TextStyle(color: Colors.yellow),),
                             onPressed: () {
                               Navigator.of(context).pop();
                               setState(
                                     () {
-                                  _todoList.remove(title);
+                                  _todoSpecialList.remove(title);
                                 },
                               );
-                              _addTodoItem(_textEdit.text);
+                              _addSpecialTodoItem(_textEdit.text);
                             },
                           ),
-                          FlatButton(
+                          TextButton(
                             child: const Text('CANCEL',
-                            style: TextStyle(color: Colors.yellow),),
+                              style: TextStyle(color: Colors.yellow),),
                             onPressed: () {
                               _textFieldController.text = '';
                               Navigator.of(context).pop();
@@ -162,20 +320,50 @@ class _TodoListState extends State<TodoList> {
                     }, //builder
                   ); //showDialog
                 }, //onPressed
-                color: Color(0xff141111),
-                splashColor: Colors.orange,
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.yellow),
+                  overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  elevation: MaterialStateProperty.all(0.0),
+                ),
                 child: Icon(
                   Icons.edit,
                   size: 35,
-                  color: Colors.yellow,
+                  color: Colors.black,
                 ),
               ),
             ),
           ),
+          SizedBox(
+            width: 50,
+            child: Container(
+              child: ElevatedButton(
+                onPressed: () {
+                  _addTodoItem(title);
+                  specialtaskDone(title);
+                  pingloadMusic();
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.yellow),
+                  overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  elevation: MaterialStateProperty.all(0.0),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.star,
+                    size: 35,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10)
         ],
       ),
     );
   }
+
+
 
   // Generate a single item widget
   Future<AlertDialog> _displayDialog(BuildContext context) async {
@@ -197,7 +385,7 @@ class _TodoListState extends State<TodoList> {
                 hintStyle: TextStyle(color: Color(0xff696969))),
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('ADD',
               style: TextStyle(color: Colors.yellow),),
               onPressed: () {
@@ -207,7 +395,7 @@ class _TodoListState extends State<TodoList> {
                 }
               },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('CANCEL',
               style: TextStyle(color: Colors.yellow),),
               onPressed: () {
@@ -222,12 +410,19 @@ class _TodoListState extends State<TodoList> {
   }
 
   List<Widget> _getItems() {
-    storeStringList(_todoList);
+
+    storeStringList(_todoSpecialList);
     getStringList();
     final List<Widget> _todoWidgets = <Widget>[];
+    for (String title in _todoSpecialList) {
+      _todoWidgets.add(_buildSpecialTodoItem(title));
+    }
+    storeStringList(_todoList);
+    getStringList();
     for (String title in _todoList) {
       _todoWidgets.add(_buildTodoItem(title));
     }
+
     return _todoWidgets;
   }
 }
