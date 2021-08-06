@@ -17,13 +17,14 @@ class _TodoListState extends State<TodoList> {
   TextEditingController _textEdit = TextEditingController();
   AudioPlayer advancedPlayer;
   String listKey = "listKey";
+  String speciallistKey = "speciallistKey";
 
   Future loadMusic() async {
     advancedPlayer = await AudioCache().play("reaverkill.mp3");
   }
 
   Future specialloadMusic() async {
-    advancedPlayer = await AudioCache().play("reaverace.mp3");
+    advancedPlayer = await AudioCache().play("primeace.mp3");
   }
 
   Future pingloadMusic() async {
@@ -35,12 +36,28 @@ class _TodoListState extends State<TodoList> {
     await prefs.setStringList(listKey, _todoList);
   }
 
+  void storeSpecialStringList(List<String> _todoSpecialList) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(speciallistKey, _todoSpecialList);
+  }
+
   void getStringList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(
       () {
         if (prefs.getStringList(listKey) != null) {
           _todoList = prefs.getStringList(listKey);
+        }
+      },
+    );
+  }
+
+  void getSpecialStringList() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(
+          () {
+        if (prefs.getStringList(speciallistKey) != null) {
+          _todoSpecialList = prefs.getStringList(speciallistKey);
         }
       },
     );
@@ -411,8 +428,8 @@ class _TodoListState extends State<TodoList> {
 
   List<Widget> _getItems() {
 
-    storeStringList(_todoSpecialList);
-    getStringList();
+    storeSpecialStringList(_todoSpecialList);
+    getSpecialStringList();
     final List<Widget> _todoWidgets = <Widget>[];
     for (String title in _todoSpecialList) {
       _todoWidgets.add(_buildSpecialTodoItem(title));
