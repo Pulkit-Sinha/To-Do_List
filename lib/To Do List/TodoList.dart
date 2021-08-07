@@ -91,11 +91,13 @@ class _TodoListState extends State<TodoList> {
   void _addTodoItem(String title) {
     setState(() => _todoList.insert(0,title));
     _textFieldController.clear();
+    storeStringList(_todoList);
   }
 
   void _addSpecialTodoItem(String title) {
     setState(() => _todoSpecialList.insert(0,title));
     _textFieldController.clear();
+    storeSpecialStringList(_todoSpecialList);
   }
 
   void taskDone(String title) {
@@ -104,6 +106,7 @@ class _TodoListState extends State<TodoList> {
         _todoList.remove(title);
       },
     );
+    storeStringList(_todoList);
   }
 
   void specialtaskDone(String title) {
@@ -112,6 +115,7 @@ class _TodoListState extends State<TodoList> {
         _todoSpecialList.remove(title);
       },
     );
+    storeSpecialStringList(_todoSpecialList);
   }
 
   // Generate list of regular item widgets
@@ -428,14 +432,14 @@ class _TodoListState extends State<TodoList> {
 
   List<Widget> _getItems() {
 
-    storeSpecialStringList(_todoSpecialList);
+    getStringList();
     getSpecialStringList();
+
     final List<Widget> _todoWidgets = <Widget>[];
     for (String title in _todoSpecialList) {
       _todoWidgets.add(_buildSpecialTodoItem(title));
     }
-    storeStringList(_todoList);
-    getStringList();
+
     for (String title in _todoList) {
       _todoWidgets.add(_buildTodoItem(title));
     }
