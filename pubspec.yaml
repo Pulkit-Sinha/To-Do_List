@@ -11,12 +11,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^0.5.2
   audioplayers: ^0.10.0
   path:
   provider: ^3.0.0+1
 
   cupertino_icons: ^1.0.2
+  path_provider: ^0.5.0+1
 
 dev_dependencies:
   flutter_launcher_icons: "^0.8.0"
