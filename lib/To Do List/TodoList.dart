@@ -10,14 +10,20 @@ class TodoList extends StatefulWidget {
   _TodoListState createState() => _TodoListState();
 }
 
+//StatefulWidget (for dynamic pages) always has 2 classes, the above is still immutable (like the StatelessWidget, for static pages)
+//but the below class is mutable
+
 class _TodoListState extends State<TodoList> {
+
   List<String> _todoList = <String>[];
   List<String> _todoSpecialList = <String>[];
+  List<String> _completedList = <String>[];
   final TextEditingController _textFieldController = TextEditingController();
   TextEditingController _textEdit = TextEditingController();
   AudioPlayer advancedPlayer;
   String listKey = "listKey";
   String speciallistKey = "speciallistKey";
+  String completedlistKey = "completedlistKey";
 
   Future loadMusic() async {
     advancedPlayer = await AudioCache().play("reaverkill.mp3");
@@ -63,10 +69,43 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
+  void _addTodoItem(String title) {
+    setState(() => _todoList.insert(0,title));
+    _textFieldController.clear();
+    storeStringList(_todoList);
+  }
+
+  void _addSpecialTodoItem(String title) {
+    setState(() => _todoSpecialList.insert(0,title));
+    _textFieldController.clear();
+    storeSpecialStringList(_todoSpecialList);
+  }
+
+  void taskDone(String title) {
+    setState(
+          () {
+        _todoList.remove(title);
+
+      },
+    );
+    storeStringList(_todoList);
+  }
+
+  void specialtaskDone(String title) {
+    setState(
+          () {
+        _todoSpecialList.remove(title);
+
+      },
+    );
+    storeSpecialStringList(_todoSpecialList);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: const Text(
           'To-Do List',
           style: TextStyle(fontWeight: FontWeight.bold,
@@ -88,36 +127,6 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
-  void _addTodoItem(String title) {
-    setState(() => _todoList.insert(0,title));
-    _textFieldController.clear();
-    storeStringList(_todoList);
-  }
-
-  void _addSpecialTodoItem(String title) {
-    setState(() => _todoSpecialList.insert(0,title));
-    _textFieldController.clear();
-    storeSpecialStringList(_todoSpecialList);
-  }
-
-  void taskDone(String title) {
-    setState(
-      () {
-        _todoList.remove(title);
-      },
-    );
-    storeStringList(_todoList);
-  }
-
-  void specialtaskDone(String title) {
-    setState(
-          () {
-        _todoSpecialList.remove(title);
-      },
-    );
-    storeSpecialStringList(_todoSpecialList);
-  }
-
   // Generate list of regular item widgets
   Widget _buildTodoItem(String title) {
     return Card(
@@ -132,6 +141,7 @@ class _TodoListState extends State<TodoList> {
                 width: 50,
                 child: ElevatedButton(
                   onPressed: () {
+                    _completedList.insert(0,title);
                     taskDone(title);
                     loadMusic();
                   },
@@ -222,6 +232,7 @@ class _TodoListState extends State<TodoList> {
                 ),
               ),
             ),
+          //star icon
           SizedBox(
             width: 50,
             child: Container(
@@ -263,6 +274,7 @@ class _TodoListState extends State<TodoList> {
                 width: 50,
                 child: ElevatedButton(
                   onPressed: () {
+                    _completedList.insert(0,title);
                     specialtaskDone(title);
                     specialloadMusic();
                   },
@@ -384,7 +396,81 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
-
+  // Generate list of completed item widgets
+  Widget _buildCompletedTodoItem(String title) {
+    return Card(
+      color: Colors.pink,
+      elevation: 5,
+      child: Row(
+        children: <Widget>[
+          //Undo button
+          Container(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                width: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _todoList.insert(0,title);
+                    storeStringList(_todoList);
+                    _completedList.remove(title);
+                    //undo music
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.pink),
+                    elevation: MaterialStateProperty.all(0.0),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.undo,
+                      size: 35,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
+          Container(
+            child: Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  title,
+                  style: TextStyle(color: Colors.black, fontSize: 18),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 50,
+            child: Container(
+              child: ElevatedButton(
+                onPressed: () {
+                  _completedList.remove(title);
+                  //delete music
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  overlayColor: MaterialStateProperty.all<Color>(Colors.pink),
+                  elevation: MaterialStateProperty.all(0.0),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.delete,
+                    size: 35,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10)
+        ],
+      ),
+    );
+  }
 
   // Generate a single item widget
   Future<AlertDialog> _displayDialog(BuildContext context) async {
@@ -430,18 +516,24 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
+  //display list of todo items
   List<Widget> _getItems() {
 
     getStringList();
     getSpecialStringList();
 
     final List<Widget> _todoWidgets = <Widget>[];
+
     for (String title in _todoSpecialList) {
       _todoWidgets.add(_buildSpecialTodoItem(title));
     }
 
     for (String title in _todoList) {
       _todoWidgets.add(_buildTodoItem(title));
+    }
+
+    for (String title in _completedList) {
+      _todoWidgets.add(_buildCompletedTodoItem(title));
     }
 
     return _todoWidgets;
